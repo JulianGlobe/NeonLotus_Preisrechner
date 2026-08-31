@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Lotus Preisrechner</title>
+
+  <style>
+    :root {
+      --background: #0d0b14;
+      --surface: #17131f;
+      --surface-soft: #211a2c;
+      --header: #7e2b83;
+      --header-2: #b43bb6;
+      --border: #3d304d;
+      --text: #f6f1fb;
+      --muted: #b8aac7;
+      --accent: #ef9df0;
+      --green: #7bd5a5;
+      --gold: #f1cf78;
+      --blue: #8ec9ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 28px 16px;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(180, 59, 182, 0.16), transparent 35%),
+        var(--background);
+    }
+
+    input {
+      font: inherit;
+    }
+
+    .calculator {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+      border-radius: 14px;
+    }
+
+    .header {
+      padding: 22px 20px;
+      text-align: center;
+      background: linear-gradient(135deg, var(--header), var(--header-2));
+      color: #fff;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: 0.4px;
+    }
+
+    .header p {
+      margin: 7px 0 0;
+      font-size: 14px;
+      opacity: 0.92;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .category {
+      margin-bottom: 24px;
+    }
+
+    .category:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .category-title {
+      margin: 0 0 12px;
+      padding-bottom: 9px;
+      border-bottom: 1px solid var(--border);
+      font-size: 19px;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .product {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+
+    .product-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-soft);
+    }
+
+    .product-name {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .unit-price {
+      color: var(--accent);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .product-body {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      padding: 14px;
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .quantity {
+      width: 100%;
+      height: 42px;
+      margin-bottom: 16px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      outline: none;
+      background: #100d17;
+      color: var(--text);
+      text-align: center;
+      font-size: 17px;
+      font-weight: 700;
+      appearance: textfield;
+    }
+
+    .quantity:focus {
+      border-color: var(--header-2);
+      box-shadow: 0 0 0 1px var(--header-2);
+    }
+
+    .quantity::-webkit-inner-spin-button,
+    .quantity::-webkit-outer-spin-button {
+      margin: 0;
+      appearance: none;
+    }
+
+    .ingredients {
+      display: grid;
+      gap: 6px;
+      min-height: 122px;
+    }
+
+    .ingredient {
+      display: grid;
+      grid-template-columns: 1fr 38px 76px;
+      gap: 8px;
+      align-items: center;
+      padding: 7px 8px;
+      background: var(--surface-soft);
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .ingredient.empty {
+      grid-template-columns: 1fr;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .ingredient-quantity,
+    .ingredient-cost {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ingredient-quantity {
+      font-weight: 700;
+    }
+
+    .ingredient-cost {
+      color: var(--muted);
+    }
+
+    .product-totals {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .value-box {
+      padding: 9px;
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+    }
+
+    .value-label {
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .value {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .value.sale {
+      color: var(--green);
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .summary-box {
+      padding: 15px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--surface-soft);
+    }
+
+    .summary-label {
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .summary-value {
+      font-size: 22px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .summary-value.sale {
+      color: var(--green);
+    }
+
+    .summary-value.faction {
+      color: var(--gold);
+    }
+
+    .summary-value.own {
+      color: var(--blue);
+    }
+
+    .hint {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 950px) {
+      .products {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .summary {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 620px) {
+      body {
+        padding: 0;
+      }
+
+      .calculator {
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .content {
+        padding: 14px;
+      }
+
+      .products,
+      .summary,
+      .product-totals {
+        grid-template-columns: 1fr;
+      }
+
+      .ingredients {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="calculator">
+    <header class="header">
+      <h1>🌸 Neon Lotus Preisrechner</h1>
+      <p>Speisen · Getränke · Erlösaufteilung</p>
+    </header>
+
+    <section class="content">
+      <section class="category">
+        <h2 class="category-title">🍜 Speisen</h2>
+        <div class="products" id="foodProducts"></div>
+      </section>
+
+      <section class="category">
+        <h2 class="category-title">🍹 Getränke</h2>
+        <div class="products" id="drinkProducts"></div>
+      </section>
+
+      <section class="summary">
+        <div class="summary-box">
+          <div class="summary-label">Einkaufskosten gesamt</div>
+          <div class="summary-value" id="totalPurchase">$0</div>
+        </div>
+
+        <div class="summary-box">
+          <div class="summary-label">Verkaufserlös gesamt</div>
+          <div class="summary-value sale" id="totalSale">$0</div>
+        </div>
+
+        <div class="summary-box">
+          <div class="summary-label">Fraktionskasse (30 %)</div>
+          <div class="summary-value faction" id="factionShare">$0</div>
+        </div>
+
+        <div class="summary-box">
+          <div class="summary-label">Eigener Anteil (70 %)</div>
+          <div class="summary-value own" id="ownShare">$0</div>
+        </div>
+      </section>
+
+      <p class="hint">
+        Die Aufteilung wird auf Basis des Verkaufserlöses berechnet: 30 % Fraktionskasse und 70 % Eigenanteil.
+        Für Bier, Wein, Wodka E und Tequila Shots sind aktuell keine Rohstoffe hinterlegt.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    const products = [
+      {
+        id: "miso",
+        category: "food",
+        name: "Lotus Miso Suppe",
+        emoji: "🍜",
+        salePrice: 5000,
+        ingredients: [
+          { name: "Gegrilltes Fleisch", quantity: 2, unitPrice: 200 },
+          { name: "Ei", quantity: 2, unitPrice: 150 },
+          { name: "Salz", quantity: 1, unitPrice: 150 }
+        ]
+      },
+      {
+        id: "lotus-cookies",
+        category: "food",
+        name: "Lotusblüten Kekse",
+        emoji: "🍪",
+        salePrice: 3000,
+        ingredients: [
+          { name: "Teig", quantity: 1, unitPrice: 15 },
+          { name: "Zucker", quantity: 1, unitPrice: 200 }
+        ]
+      },
+      {
+        id: "white-lotus",
+        category: "drink",
+        name: "White Lotus Limonade",
+        emoji: "🍹",
+        salePrice: 4000,
+        ingredients: [
+          { name: "Wasser", quantity: 2, unitPrice: 150 },
+          { name: "Zucker", quantity: 2, unitPrice: 200 }
+        ]
+      },
+      {
+        id: "beer",
+        category: "drink",
+        name: "Bier",
+        emoji: "🍺",
+        salePrice: 1000,
+        ingredients: []
+      },
+      {
+        id: "wine",
+        category: "drink",
+        name: "Wein",
+        emoji: "🍷",
+        salePrice: 1500,
+        ingredients: []
+      },
+      {
+        id: "vodka-e",
+        category: "drink",
+        name: "Wodka E",
+        emoji: "🥃",
+        salePrice: 2000,
+        ingredients: []
+      },
+      {
+        id: "tequila",
+        category: "drink",
+        name: "Tequila Shots",
+        emoji: "🥃",
+        salePrice: 2000,
+        ingredients: []
+      }
+    ];
+
+    const quantities = Object.fromEntries(
+      products.map(product => [product.id, 0])
+    );
+
+
+    const money = value =>
+      "$" + Math.round(value).toLocaleString("de-DE");
+
+    const purchasePrice = product =>
+      product.ingredients.reduce(
+        (sum, ingredient) =>
+          sum + ingredient.quantity * ingredient.unitPrice,
+        0
+      );
+
+    function createProduct(product, index) {
+      const element = document.createElement("article");
+      element.className = "product";
+
+      element.innerHTML = `
+        <header class="product-header">
+          <h3 class="product-name">${product.emoji} ${product.name}</h3>
+          <div class="unit-price" id="unit-price-${product.id}">${money(product.salePrice)}</div>
+        </header>
+
+        <div class="product-body">
+          <label class="label" for="quantity-${product.id}">Anzahl</label>
+
+          <input
+            class="quantity"
+            id="quantity-${product.id}"
+            type="number"
+            min="0"
+            step="1"
+            value="0"
+            tabindex="${index + 1}"
+            data-quantity="${product.id}"
+            autocomplete="off"
+          >
+
+          <div class="label">Rohstoffe</div>
+          <div class="ingredients" id="ingredients-${product.id}"></div>
+
+          <div class="product-totals">
+            <div class="value-box">
+              <div class="value-label">Einkaufskosten</div>
+              <div class="value" id="purchase-${product.id}">$0</div>
+            </div>
+
+            <div class="value-box">
+              <div class="value-label">Verkaufserlös</div>
+              <div class="value sale" id="sale-${product.id}">$0</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      return element;
+    }
+
+    function buildProducts() {
+      const foodContainer = document.getElementById("foodProducts");
+      const drinkContainer = document.getElementById("drinkProducts");
+
+      products.forEach((product, index) => {
+        const card = createProduct(product, index);
+
+        if (product.category === "food") {
+          foodContainer.appendChild(card);
+        } else {
+          drinkContainer.appendChild(card);
+        }
+      });
+    }
+
+    function renderIngredients(product, productQuantity) {
+      const container = document.getElementById(
+        `ingredients-${product.id}`
+      );
+
+      container.innerHTML = "";
+
+      if (product.ingredients.length === 0) {
+        const row = document.createElement("div");
+        row.className = "ingredient empty";
+        row.textContent = "Keine Rohstoffe hinterlegt";
+        container.appendChild(row);
+        return;
+      }
+
+      product.ingredients.forEach(ingredient => {
+        const quantity = ingredient.quantity * productQuantity;
+        const cost = quantity * ingredient.unitPrice;
+
+        const row = document.createElement("div");
+        row.className = "ingredient";
+        row.innerHTML = `
+          <span>${ingredient.name}</span>
+          <span class="ingredient-quantity">${quantity}</span>
+          <span class="ingredient-cost">${money(cost)}</span>
+        `;
+
+        container.appendChild(row);
+      });
+    }
+
+    function updateCalculator() {
+      let totalPurchase = 0;
+      let totalSale = 0;
+
+      products.forEach(product => {
+        const quantity = quantities[product.id];
+        const purchaseTotal = purchasePrice(product) * quantity;
+        const saleTotal = product.salePrice * quantity;
+
+        renderIngredients(product, quantity);
+
+        document.getElementById(
+          `unit-price-${product.id}`
+        ).textContent = money(product.salePrice);
+
+        document.getElementById(
+          `purchase-${product.id}`
+        ).textContent = money(purchaseTotal);
+
+        document.getElementById(
+          `sale-${product.id}`
+        ).textContent = money(saleTotal);
+
+        totalPurchase += purchaseTotal;
+        totalSale += saleTotal;
+      });
+
+      const factionShare = totalSale * 0.3;
+      const ownShare = totalSale * 0.7;
+
+      document.getElementById("totalPurchase").textContent =
+        money(totalPurchase);
+
+      document.getElementById("totalSale").textContent =
+        money(totalSale);
+
+      document.getElementById("factionShare").textContent =
+        money(factionShare);
+
+      document.getElementById("ownShare").textContent =
+        money(ownShare);
+    }
+
+    document.addEventListener("focusin", event => {
+      if (event.target.matches("[data-quantity]")) {
+        event.target.select();
+      }
+    });
+
+    document.addEventListener("input", event => {
+      if (!event.target.matches("[data-quantity]")) {
+        return;
+      }
+
+      const productId = event.target.dataset.quantity;
+      const parsedValue = Number.parseInt(event.target.value, 10);
+
+      quantities[productId] = Number.isNaN(parsedValue)
+        ? 0
+        : Math.max(0, parsedValue);
+
+      updateCalculator();
+    });
+
+    buildProducts();
+    updateCalculator();
+  </script>
+</body>
+</html>
