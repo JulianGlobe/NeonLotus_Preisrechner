@@ -237,6 +237,67 @@
       color: var(--green);
     }
 
+
+    .packages {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .package {
+      display: flex;
+      flex-direction: column;
+      min-height: 210px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+
+    .package-header {
+      padding: 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-soft);
+    }
+
+    .package-name {
+      margin: 0 0 7px;
+      font-size: 18px;
+    }
+
+    .package-description {
+      min-height: 38px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .package-body {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      padding: 14px;
+    }
+
+    .package-price {
+      margin-bottom: 14px;
+      color: var(--accent);
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .package-price small {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .package-totals {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: auto;
+    }
+
     .summary {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -283,7 +344,8 @@
     }
 
     @media (max-width: 950px) {
-      .products {
+      .products,
+      .packages {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
@@ -308,8 +370,10 @@
       }
 
       .products,
+      .packages,
       .summary,
-      .product-totals {
+      .product-totals,
+      .package-totals {
         grid-template-columns: 1fr;
       }
 
@@ -338,6 +402,11 @@
         <div class="products" id="drinkProducts"></div>
       </section>
 
+      <section class="category">
+        <h2 class="category-title">🌸 Cateringpakete</h2>
+        <div class="packages" id="cateringPackages"></div>
+      </section>
+
       <section class="summary">
         <div class="summary-box">
           <div class="summary-label">Einkaufskosten gesamt</div>
@@ -361,7 +430,7 @@
       </section>
 
       <p class="hint">
-        Die Aufteilung wird auf Basis des Verkaufserlöses berechnet: 30 % Fraktionskasse und 70 % Eigenanteil.
+        Die Aufteilung wird auf Basis des gesamten Verkaufserlöses inklusive Catering berechnet: 30 % Fraktionskasse und 70 % Eigenanteil.
         Für Bier, Wein, Wodka E und Tequila Shots sind aktuell keine Rohstoffe hinterlegt.
       </p>
     </section>
@@ -374,7 +443,7 @@
         category: "food",
         name: "Lotus Miso Suppe",
         emoji: "🍜",
-        salePrice: 4000,
+        salePrice: 5000,
         ingredients: [
           { name: "Gegrilltes Fleisch", quantity: 2, unitPrice: 500 },
           { name: "Ei", quantity: 2, unitPrice: 320 },
@@ -386,7 +455,7 @@
         category: "food",
         name: "Lotusblüten Kekse",
         emoji: "🍪",
-        salePrice: 2000,
+        salePrice: 3000,
         ingredients: [
           { name: "Teig", quantity: 1, unitPrice: 300 },
           { name: "Zucker", quantity: 1, unitPrice: 200 }
@@ -397,7 +466,7 @@
         category: "drink",
         name: "White Lotus Limonade",
         emoji: "🍹",
-        salePrice: 2500,
+        salePrice: 4000,
         ingredients: [
           { name: "Wasser", quantity: 2, unitPrice: 250 },
           { name: "Zucker", quantity: 2, unitPrice: 200 }
@@ -437,8 +506,33 @@
       }
     ];
 
+    const cateringPackages = [
+      {
+        id: "lotus-pure",
+        name: "Lotus Pure",
+        description: "White Lotus Limonade · Lotus Miso Suppe · Lotusblüten Kekse",
+        pricePerPerson: 8000
+      },
+      {
+        id: "lotus-night",
+        name: "Lotus Night",
+        description: "Bier · Wein · Wodka E · Tequila Shot",
+        pricePerPerson: 6000
+      },
+      {
+        id: "lotus-deluxe",
+        name: "Lotus Deluxe",
+        description: "Unser gesamtes Sortiment",
+        pricePerPerson: 14000
+      }
+    ];
+
     const quantities = Object.fromEntries(
       products.map(product => [product.id, 0])
+    );
+
+    const packageQuantities = Object.fromEntries(
+      cateringPackages.map(packageItem => [packageItem.id, 0])
     );
 
 
@@ -512,6 +606,59 @@
       });
     }
 
+    function createPackage(packageItem, index) {
+      const element = document.createElement("article");
+      element.className = "package";
+
+      element.innerHTML = `
+        <header class="package-header">
+          <h3 class="package-name">🌸 ${packageItem.name}</h3>
+          <div class="package-description">${packageItem.description}</div>
+        </header>
+
+        <div class="package-body">
+          <div class="package-price">${money(packageItem.pricePerPerson)} <small>/ Person</small></div>
+
+          <label class="label" for="package-quantity-${packageItem.id}">Personen</label>
+          <input
+            class="quantity"
+            id="package-quantity-${packageItem.id}"
+            type="number"
+            min="0"
+            step="1"
+            value="0"
+            tabindex="${products.length + index + 1}"
+            data-package-quantity="${packageItem.id}"
+            autocomplete="off"
+          >
+
+          <div class="package-totals">
+            <div class="value-box">
+              <div class="value-label">Gesamt</div>
+              <div class="value sale" id="package-total-${packageItem.id}">$0</div>
+            </div>
+            <div class="value-box">
+              <div class="value-label">Fraktionskasse 30 %</div>
+              <div class="value" id="package-faction-${packageItem.id}">$0</div>
+            </div>
+            <div class="value-box">
+              <div class="value-label">Eigenanteil 70 %</div>
+              <div class="value" id="package-own-${packageItem.id}">$0</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      return element;
+    }
+
+    function buildPackages() {
+      const container = document.getElementById("cateringPackages");
+      cateringPackages.forEach((packageItem, index) => {
+        container.appendChild(createPackage(packageItem, index));
+      });
+    }
+
     function renderIngredients(product, productQuantity) {
       const container = document.getElementById(
         `ingredients-${product.id}`
@@ -570,6 +717,22 @@
         totalSale += saleTotal;
       });
 
+      cateringPackages.forEach(packageItem => {
+        const quantity = packageQuantities[packageItem.id];
+        const packageTotal = packageItem.pricePerPerson * quantity;
+        const packageFaction = packageTotal * 0.3;
+        const packageOwn = packageTotal * 0.7;
+
+        document.getElementById(`package-total-${packageItem.id}`).textContent =
+          money(packageTotal);
+        document.getElementById(`package-faction-${packageItem.id}`).textContent =
+          money(packageFaction);
+        document.getElementById(`package-own-${packageItem.id}`).textContent =
+          money(packageOwn);
+
+        totalSale += packageTotal;
+      });
+
       const factionShare = totalSale * 0.3;
       const ownShare = totalSale * 0.7;
 
@@ -587,27 +750,29 @@
     }
 
     document.addEventListener("focusin", event => {
-      if (event.target.matches("[data-quantity]")) {
+      if (event.target.matches("[data-quantity], [data-package-quantity]")) {
         event.target.select();
       }
     });
 
     document.addEventListener("input", event => {
-      if (!event.target.matches("[data-quantity]")) {
+      const parsedValue = Number.parseInt(event.target.value, 10);
+      const value = Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue);
+
+      if (event.target.matches("[data-quantity]")) {
+        quantities[event.target.dataset.quantity] = value;
+        updateCalculator();
         return;
       }
 
-      const productId = event.target.dataset.quantity;
-      const parsedValue = Number.parseInt(event.target.value, 10);
-
-      quantities[productId] = Number.isNaN(parsedValue)
-        ? 0
-        : Math.max(0, parsedValue);
-
-      updateCalculator();
+      if (event.target.matches("[data-package-quantity]")) {
+        packageQuantities[event.target.dataset.packageQuantity] = value;
+        updateCalculator();
+      }
     });
 
     buildProducts();
+    buildPackages();
     updateCalculator();
   </script>
 </body>
