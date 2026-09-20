@@ -419,18 +419,18 @@
         </div>
 
         <div class="summary-box">
-          <div class="summary-label">Fraktionskasse (30 %)</div>
+          <div class="summary-label">Fraktionskasse (20 %)</div>
           <div class="summary-value faction" id="factionShare">$0</div>
         </div>
 
         <div class="summary-box">
-          <div class="summary-label">Eigener Anteil (70 %)</div>
+          <div class="summary-label">Eigener Anteil (80 %)</div>
           <div class="summary-value own" id="ownShare">$0</div>
         </div>
       </section>
 
       <p class="hint">
-        Die Aufteilung wird auf Basis des gesamten Verkaufserlöses inklusive Catering berechnet: 30 % Fraktionskasse und 70 % Eigenanteil.
+        Die Aufteilung wird auf Basis des gesamten Verkaufserlöses inklusive Catering berechnet: 20 % Fraktionskasse und 80 % Eigenanteil.
         Für Bier, Wein, Wodka E und Tequila Shots sind aktuell keine Rohstoffe hinterlegt.
       </p>
     </section>
@@ -443,7 +443,7 @@
         category: "food",
         name: "Lotus Miso Suppe",
         emoji: "🍜",
-        salePrice: 4000,
+        salePrice: 5000,
         ingredients: [
           { name: "Gegrilltes Fleisch", quantity: 2, unitPrice: 500 },
           { name: "Ei", quantity: 2, unitPrice: 320 },
@@ -455,7 +455,7 @@
         category: "food",
         name: "Lotusblüten Kekse",
         emoji: "🍪",
-        salePrice: 2000,
+        salePrice: 3000,
         ingredients: [
           { name: "Teig", quantity: 1, unitPrice: 300 },
           { name: "Zucker", quantity: 1, unitPrice: 200 }
@@ -466,7 +466,7 @@
         category: "drink",
         name: "White Lotus Limonade",
         emoji: "🍹",
-        salePrice: 2500,
+        salePrice: 4000,
         ingredients: [
           { name: "Wasser", quantity: 2, unitPrice: 250 },
           { name: "Zucker", quantity: 2, unitPrice: 200 }
@@ -638,11 +638,11 @@
               <div class="value sale" id="package-total-${packageItem.id}">$0</div>
             </div>
             <div class="value-box">
-              <div class="value-label">Fraktionskasse 30 %</div>
+              <div class="value-label">Fraktionskasse 20 %</div>
               <div class="value" id="package-faction-${packageItem.id}">$0</div>
             </div>
             <div class="value-box">
-              <div class="value-label">Eigenanteil 70 %</div>
+              <div class="value-label">Eigenanteil 80 %</div>
               <div class="value" id="package-own-${packageItem.id}">$0</div>
             </div>
           </div>
@@ -720,8 +720,8 @@
       cateringPackages.forEach(packageItem => {
         const quantity = packageQuantities[packageItem.id];
         const packageTotal = packageItem.pricePerPerson * quantity;
-        const packageFaction = packageTotal * 0.3;
-        const packageOwn = packageTotal * 0.7;
+        const packageFaction = packageTotal * 0.2;
+        const packageOwn = packageTotal * 0.8;
 
         document.getElementById(`package-total-${packageItem.id}`).textContent =
           money(packageTotal);
@@ -733,8 +733,8 @@
         totalSale += packageTotal;
       });
 
-      const factionShare = totalSale * 0.3;
-      const ownShare = totalSale * 0.7;
+      const factionShare = totalSale * 0.2;
+      const ownShare = totalSale * 0.8;
 
       document.getElementById("totalPurchase").textContent =
         money(totalPurchase);
